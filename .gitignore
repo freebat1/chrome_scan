@@ -1,0 +1,63 @@
+# Development documentation (exclude all except core files)
+ALL_FIXES_SUMMARY.md
+ARROW_KEY_NAV.md
+CAPTURE_OVERLAY_FIX.md
+CONNECTION_ERROR_FIXED.md
+ERROR_FIXED.md
+FINAL_FIX.md
+FINAL_SCROLL_CROP_SOLUTION.md
+FINAL_STATUS.md
+FIX_SAVE_DIALOG.md
+FIXES_APPLIED.md
+LATEST_FIX.md
+MESSAGE_ERROR_FIXED.md
+NO_OVERLAP_FIX.md
+OFFSET_FEATURE.md
+OVERLAP_REMOVAL_GUIDE.md
+PRECISE_CROP_BASED_ON_SCROLL.md
+QUICK_FIX_GUIDE.md
+QUICK_START.md
+QUICK_TEST.md
+RELOAD_AND_TEST.md
+RELOAD_NOW.md
+SCROLL_FIX.md
+SCROLLING_FIXED.md
+TEST_AGAIN.md
+TEST_RESULTS.md
+TESTING_GUIDE.md
+UPDATED_FIXES.md
+
+# Test files
+test_guideline.html
+test_page.html
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output directories
+output/
+merged/
+Downloads/
+
+# Claude
+.claude/

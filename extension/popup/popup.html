@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Page Capture</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Book Capture</h1>
+    </div>
+
+    <div class="status-section">
+      <div class="status-row">
+        <span class="label">Status:</span>
+        <span id="status" class="value">Ready</span>
+      </div>
+      <div class="status-row">
+        <span class="label">Captured:</span>
+        <span id="captured" class="value">0 pages</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="setting-row">
+        <label for="delay">Delay (ms):</label>
+        <input type="number" id="delay" value="1000" min="100" max="5000" step="100">
+      </div>
+
+      <div class="setting-row">
+        <label for="totalPages">Pages (0=all):</label>
+        <input type="number" id="totalPages" value="0" min="0" max="9999">
+      </div>
+
+      <div class="setting-row checkbox-row">
+        <label>
+          <input type="checkbox" id="scrollCapture" checked>
+          Scroll Capture
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <label for="scrollDelay">Scroll delay (ms):</label>
+        <input type="number" id="scrollDelay" value="1200" min="100" max="5000" step="100">
+      </div>
+
+      <div class="setting-row">
+        <label for="quality">Quality (%):</label>
+        <input type="number" id="quality" value="90" min="50" max="100" step="5">
+      </div>
+
+      <div class="setting-row">
+        <label for="leftOffset">Left offset (px):</label>
+        <input type="number" id="leftOffset" value="0" min="0" max="1000" step="10">
+      </div>
+
+      <div class="setting-row">
+        <label for="rightOffset">Right offset (px):</label>
+        <input type="number" id="rightOffset" value="0" min="0" max="1000" step="10">
+      </div>
+
+      <div class="setting-row">
+        <button id="showGuidelinesBtn" class="btn btn-guidelines">Show Guidelines</button>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <button id="startBtn" class="btn btn-start">Start</button>
+      <button id="stopBtn" class="btn btn-stop" disabled>Stop</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
