@@ -26,16 +26,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function capturePage(pageNumber, settings) {
   console.log(`[Book Capture] Starting capture for page ${pageNumber}`);
   console.log(`[Book Capture] Settings:`, settings);
+  console.log(`[Book Capture] scrollCapture setting is: ${settings.scrollCapture}`);
+
+  // Only check scrollability if scroll capture is enabled
+  if (!settings.scrollCapture) {
+    // Single capture - no scrolling at all
+    console.log(`[Book Capture] Page ${pageNumber}: Scroll capture DISABLED - using single capture mode`);
+    return await captureSinglePage(pageNumber, settings);
+  }
 
   const isScrollable = checkIfScrollable();
 
-  if (settings.scrollCapture && isScrollable) {
+  if (isScrollable) {
     // Capture segments
     console.log(`[Book Capture] Page ${pageNumber}: Using scroll capture mode`);
     return await captureScrollablePage(pageNumber, settings);
   } else {
     // Single capture
-    console.log(`[Book Capture] Page ${pageNumber}: Using single capture mode (scrollCapture=${settings.scrollCapture}, isScrollable=${isScrollable})`);
+    console.log(`[Book Capture] Page ${pageNumber}: Page not scrollable - using single capture mode`);
     return await captureSinglePage(pageNumber, settings);
   }
 }
@@ -81,10 +89,8 @@ function checkIfScrollable() {
 
 // Capture single page (no scroll)
 async function captureSinglePage(pageNumber, settings) {
-  // Scroll to top first
-  const scrollElement = findScrollableElement();
-  scrollElement.scrollTop = 0;
-  window.scrollTo(0, 0);
+  // Don't scroll at all - capture current viewport as-is
+  console.log(`[Book Capture] Single page capture - no scrolling`);
   await wait(100);
 
   return {

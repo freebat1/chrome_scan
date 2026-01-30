@@ -31,10 +31,15 @@ chrome.storage.local.get({
   rightOffsetInput.value = settings.rightOffset;
 });
 
-// Load current capture state
+// Load current capture state - this runs every time popup opens
 chrome.storage.local.get(['isCapturing', 'pagesCaptured'], (data) => {
+  console.log('[Popup] Loading capture state from storage:', data);
   if (data.isCapturing) {
+    console.log('[Popup] Capture is in progress, enabling stop button');
     setCapturingState(true, data.pagesCaptured || 0);
+  } else {
+    console.log('[Popup] No capture in progress');
+    setCapturingState(false, data.pagesCaptured || 0);
   }
 });
 
@@ -76,11 +81,18 @@ startBtn.addEventListener('click', async () => {
     rightOffset: parseInt(rightOffsetInput.value)
   };
 
+  console.log('[Popup] Starting capture with settings:', settings);
+  console.log('[Popup] scrollCapture is:', settings.scrollCapture);
+
   // Save settings
   await chrome.storage.local.set(settings);
 
   // Get current tab
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  // Immediately update UI to show capturing state
+  // This ensures the stop button is enabled even if popup closes and reopens
+  setCapturingState(true, 0);
 
   // Send start command to background
   chrome.runtime.sendMessage({
@@ -88,10 +100,16 @@ startBtn.addEventListener('click', async () => {
     tabId: tab.id,
     settings: settings
   }, (response) => {
-    if (response.success) {
-      setCapturingState(true, 0);
+    console.log('[Popup] Start capture response:', response);
+    if (response && response.success) {
+      // Already set to capturing state above
+      console.log('[Popup] Capture started successfully');
     } else {
-      updateStatus('Error: ' + response.error, 'error');
+      // Revert to ready state on error
+      const errorMsg = response ? response.error : 'No response from background';
+      console.error('[Popup] Capture failed:', errorMsg);
+      setCapturingState(false, 0);
+      updateStatus('Error: ' + errorMsg, 'error');
     }
   });
 });
@@ -128,6 +146,7 @@ function updateStatus(text, className) {
 
 // Listen for updates from background
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('[Popup] Received message:', message);
   if (message.action === 'updateProgress') {
     capturedEl.textContent = `${message.pagesCaptured} pages`;
   } else if (message.action === 'captureComplete') {
@@ -136,5 +155,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === 'captureError') {
     setCapturingState(false, message.pagesCaptured);
     updateStatus('Error: ' + message.error, 'error');
+  }
+});
+
+// Listen for storage changes to keep UI in sync
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local') {
+    console.log('[Popup] Storage changed:', changes);
+    if (changes.isCapturing !== undefined) {
+      const isCapturing = changes.isCapturing.newValue;
+      const pagesCaptured = changes.pagesCaptured ? changes.pagesCaptured.newValue : 0;
+      console.log('[Popup] Capture state changed to:', isCapturing);
+      setCapturingState(isCapturing, pagesCaptured);
+    } else if (changes.pagesCaptured !== undefined) {
+      capturedEl.textContent = `${changes.pagesCaptured.newValue} pages`;
+    }
   }
 });
