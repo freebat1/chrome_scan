@@ -3,22 +3,35 @@
  * Automated test for Book Capture Chrome Extension
  *
  * Usage:
- *   npm install puppeteer
- *   node test_extension.js
+ *   Option 1: Local Chrome (with puppeteer)
+ *     npm install puppeteer
+ *     node test_extension.js
+ *
+ *   Option 2: Remote Chrome (with puppeteer-core)
+ *     npm install puppeteer-core
+ *     # On Windows, start Chrome with: chrome.exe --remote-debugging-port=9222
+ *     CHROME_WS=ws://localhost:9222 node test_extension.js
  *
  * This script:
- * 1. Launches Chrome with the extension loaded
+ * 1. Launches Chrome with the extension loaded (or connects to remote Chrome)
  * 2. Opens the test page
  * 3. Tests scroll capture disabled behavior
  * 4. Tests stop button state
  */
 
-const puppeteer = require('puppeteer');
+let puppeteer;
+try {
+  puppeteer = require('puppeteer');
+} catch (e) {
+  puppeteer = require('puppeteer-core');
+}
+
 const path = require('path');
 const fs = require('fs');
 
 const EXTENSION_PATH = path.resolve(__dirname);
 const TEST_PAGE_PATH = path.join(EXTENSION_PATH, 'test_page.html');
+const CHROME_WS = process.env.CHROME_WS; // e.g., ws://localhost:9222
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -30,18 +43,48 @@ async function runTests() {
   console.log('='.repeat(60));
   console.log();
 
-  // Launch browser with extension
-  console.log('[1/5] Launching Chrome with extension...');
-  const browser = await puppeteer.launch({
-    headless: false, // Need to see the extension UI
-    args: [
-      `--disable-extensions-except=${EXTENSION_PATH}`,
-      `--load-extension=${EXTENSION_PATH}`,
-      '--no-sandbox',
-      '--disable-setuid-sandbox'
-    ],
-    defaultViewport: null
-  });
+  let browser;
+
+  if (CHROME_WS) {
+    // Connect to remote Chrome
+    console.log(`[1/5] Connecting to remote Chrome at ${CHROME_WS}...`);
+    const http = require('http');
+
+    // Get WebSocket URL from Chrome DevTools
+    const wsUrl = await new Promise((resolve, reject) => {
+      http.get(`http://${CHROME_WS.replace('ws://', '').split('/')[0]}/json/version`, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            resolve(json.webSocketDebuggerUrl);
+          } catch (e) {
+            resolve(CHROME_WS);
+          }
+        });
+      }).on('error', () => resolve(CHROME_WS));
+    });
+
+    browser = await puppeteer.connect({
+      browserWSEndpoint: wsUrl,
+      defaultViewport: null
+    });
+    console.log('  ✓ Connected to remote Chrome');
+  } else {
+    // Launch local Chrome with extension
+    console.log('[1/5] Launching Chrome with extension...');
+    browser = await puppeteer.launch({
+      headless: false, // Need to see the extension UI
+      args: [
+        `--disable-extensions-except=${EXTENSION_PATH}`,
+        `--load-extension=${EXTENSION_PATH}`,
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ],
+      defaultViewport: null
+    });
+  }
 
   const page = await browser.newPage();
 
