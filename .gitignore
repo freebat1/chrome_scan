@@ -31,6 +31,9 @@ UPDATED_FIXES.md
 test_guideline.html
 # Note: extension/test_page.html is intentionally tracked (referenced in README)
 
+# Node modules
+node_modules/
+
 # Python
 __pycache__/
 *.py[cod]
