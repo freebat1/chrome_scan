@@ -29,7 +29,7 @@ UPDATED_FIXES.md
 
 # Test files
 test_guideline.html
-test_page.html
+# Note: extension/test_page.html is intentionally tracked (referenced in README)
 
 # Python
 __pycache__/

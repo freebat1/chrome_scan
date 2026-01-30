@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Capture Test Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f5f5f0;
+      color: #333;
+      line-height: 1.8;
+    }
+
+    .reader-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4285f4, #34a853);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 1.5em;
+      margin-bottom: 5px;
+    }
+
+    .header .subtitle {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+
+    .page-indicator {
+      background: rgba(0,0,0,0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .page-content {
+      padding: 40px;
+    }
+
+    .page-title {
+      font-size: 2em;
+      color: #4285f4;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .chapter-section {
+      margin-bottom: 30px;
+    }
+
+    .chapter-section h3 {
+      color: #34a853;
+      margin-bottom: 15px;
+    }
+
+    .chapter-section p {
+      text-align: justify;
+      margin-bottom: 15px;
+      text-indent: 2em;
+    }
+
+    .page-number {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+      font-style: italic;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 30px;
+    }
+
+    .nav-hint {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(66, 133, 244, 0.9);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+
+    .nav-hint kbd {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 0 2px;
+    }
+
+    .transition-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.3);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      font-size: 3em;
+      color: white;
+    }
+
+    .test-info {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px 20px;
+      margin: 20px 40px;
+      border-radius: 8px;
+    }
+
+    .test-info h4 {
+      color: #856404;
+      margin-bottom: 8px;
+    }
+
+    .test-info ul {
+      margin-left: 20px;
+      color: #856404;
+    }
+
+    /* Scrollable content indicator */
+    .scroll-indicator {
+      position: fixed;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #4285f4;
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      z-index: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="reader-container">
+    <div class="header">
+      <h1>Book Capture Extension Test</h1>
+      <div class="subtitle">Test Page for Scrolling and Navigation</div>
+      <div class="page-indicator">Page <span id="currentPage">1</span> of <span id="totalPages">5</span></div>
+    </div>
+
+    <div id="pageContent" class="page-content">
+      <!-- Content will be dynamically loaded -->
+    </div>
+
+    <div class="page-number">
+      - Page <span id="bottomPageNum">1</span> -
+    </div>
+  </div>
+
+  <div class="nav-hint">
+    Navigate: <kbd>&larr;</kbd> Previous | <kbd>&rarr;</kbd> Next
+  </div>
+
+  <div id="transitionOverlay" class="transition-overlay"></div>
+
+  <div class="scroll-indicator" id="scrollIndicator">
+    Scroll to see more content
+  </div>
+
+  <script>
+    // Page content data - simulating a book with varying content lengths
+    const pages = [
+      {
+        title: "Chapter 1: Introduction to Testing",
+        sections: [
+          {
+            heading: "Welcome to the Test Page",
+            content: `This test page simulates a web-based book reader to help you verify the Book Capture Chrome Extension functionality. The page supports arrow key navigation and contains scrollable content to test the scroll capture feature.`
+          },
+          {
+            heading: "How to Use This Test Page",
+            content: `To test the extension, simply load it in Chrome and navigate to this page. Use the arrow keys to move between pages, just like a real book reader. The extension should detect scrollable pages and capture them in segments.`
+          },
+          {
+            heading: "Testing Scroll Capture",
+            content: `This page contains enough content to require scrolling on most screen sizes. When the extension detects scrollable content, it will capture the page in multiple segments and save them with numbered suffixes (e.g., 001_p1.jpg, 001_p2.jpg).`
+          },
+          {
+            heading: "Additional Test Content",
+            content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`
+          },
+          {
+            heading: "More Content for Scrolling",
+            content: `Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.`
+          },
+          {
+            heading: "Final Section of Chapter 1",
+            content: `Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.`
+          }
+        ],
+        testInfo: "This is Page 1 - A long scrollable page to test scroll capture"
+      },
+      {
+        title: "Chapter 2: Short Page Example",
+        sections: [
+          {
+            heading: "A Shorter Page",
+            content: `This page has less content and may not require scrolling on larger screens. The extension should detect this and capture it as a single image without segments.`
+          },
+          {
+            heading: "Quick Test",
+            content: `Use this page to verify that single-page capture works correctly when no scrolling is needed.`
+          }
+        ],
+        testInfo: "This is Page 2 - A shorter page to test single capture"
+      },
+      {
+        title: "Chapter 3: Medium Content",
+        sections: [
+          {
+            heading: "Medium Length Content",
+            content: `This page contains a moderate amount of content. Depending on your screen size and browser window dimensions, this may or may not require scrolling.`
+          },
+          {
+            heading: "Variable Scroll Testing",
+            content: `At ille pellit sensum omnem ac rationem, et dum voluptatis causa omnia sapiens faciat, ne illud quidem intellegit, cuius causa id faciat. Itaque dicunt nec dubitant, cur verear ne interimam, si omnia voluptatis causa faciam.`
+          },
+          {
+            heading: "Additional Paragraphs",
+            content: `Quam ob rem tandem, inquit, non potest ea ratio, quae te nihil otiose, nihil sine causa. Nam quod ais scribam me pluribus verbis, more philosophorum, eoque cum quadam comparatione, non video, inquam, cur id non liceat. Sed me locus ipse admonet, ut aliquid etiam de moribus nostris requiram.`
+          },
+          {
+            heading: "Continuing the Chapter",
+            content: `Mihi quidem ex his locis quos exposui, id effici videtur, ut honestate praestantissimum esse nemo sit qui dubitet. At enim hic etiam Philo noster egregie defendit; quod probari potest, si verum est, quod Zeno voluit.`
+          }
+        ],
+        testInfo: "This is Page 3 - Medium content page"
+      },
+      {
+        title: "Chapter 4: Another Long Page",
+        sections: [
+          {
+            heading: "Extended Content Section",
+            content: `This page contains extensive content to ensure scroll capture is working properly. Multiple segments should be created when capturing this page.`
+          },
+          {
+            heading: "Book Reader Simulation",
+            content: `The Book Capture extension is designed to work with various online book readers. This test page simulates common patterns found in these readers, including navigation via arrow keys and scrollable content areas.`
+          },
+          {
+            heading: "Technical Details",
+            content: `When capturing a scrollable page, the extension scrolls to each section of the page, takes a screenshot, and saves it with a segment number. The Python merge tool can then combine these segments into a single image.`
+          },
+          {
+            heading: "Quality Settings",
+            content: `You can adjust the JPG quality in the extension settings. Higher quality means larger file sizes but better image clarity. The default setting of 90% provides a good balance between quality and file size.`
+          },
+          {
+            heading: "Delay Settings",
+            content: `The delay setting controls how long the extension waits between capturing pages. This allows time for page transitions and loading. If pages are loading slowly, increase this value.`
+          },
+          {
+            heading: "Scroll Delay",
+            content: `The scroll delay controls how long the extension waits after scrolling before capturing. This ensures the page has fully rendered before the screenshot is taken. Increase this if you notice blurry or incomplete captures.`
+          },
+          {
+            heading: "More Testing Content",
+            content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+          },
+          {
+            heading: "Almost Done",
+            content: `Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`
+          }
+        ],
+        testInfo: "This is Page 4 - Another long scrollable page"
+      },
+      {
+        title: "Chapter 5: Final Test Page",
+        sections: [
+          {
+            heading: "Congratulations!",
+            content: `You've reached the final test page. If the extension captured all 5 pages correctly, you should have a series of JPG files in your Downloads folder.`
+          },
+          {
+            heading: "Verifying Your Captures",
+            content: `Check your Downloads folder for a subfolder named with today's date (e.g., 2026-01-30). Inside, you should find files named 001.jpg (or 001_p1.jpg, 001_p2.jpg for scrollable pages), 002.jpg, etc.`
+          },
+          {
+            heading: "Merging Segments",
+            content: `If you have segment files (files with _p1, _p2 suffixes), use the Python merge tool to combine them. Run: python merge_pages.py --input ./Downloads/YYYY-MM-DD`
+          },
+          {
+            heading: "Test Complete",
+            content: `Thank you for testing the Book Capture extension. If you encountered any issues, please check the troubleshooting section in the README or report the issue on GitHub.`
+          }
+        ],
+        testInfo: "This is Page 5 - The final test page"
+      }
+    ];
+
+    let currentPage = 1;
+    const totalPages = pages.length;
+
+    // Update total pages display
+    document.getElementById('totalPages').textContent = totalPages;
+
+    // Render page content
+    function renderPage(pageNum) {
+      const page = pages[pageNum - 1];
+      const contentEl = document.getElementById('pageContent');
+
+      let html = `<h2 class="page-title">${page.title}</h2>`;
+
+      if (page.testInfo) {
+        html += `
+          <div class="test-info">
+            <h4>Test Information</h4>
+            <ul>
+              <li>${page.testInfo}</li>
+              <li>Press <strong>Right Arrow (→)</strong> to go to next page</li>
+              <li>Press <strong>Left Arrow (←)</strong> to go to previous page</li>
+            </ul>
+          </div>
+        `;
+      }
+
+      page.sections.forEach(section => {
+        html += `
+          <div class="chapter-section">
+            <h3>${section.heading}</h3>
+            <p>${section.content}</p>
+          </div>
+        `;
+      });
+
+      contentEl.innerHTML = html;
+
+      // Update page indicators
+      document.getElementById('currentPage').textContent = pageNum;
+      document.getElementById('bottomPageNum').textContent = pageNum;
+
+      // Scroll to top
+      window.scrollTo(0, 0);
+
+      // Update scroll indicator visibility
+      updateScrollIndicator();
+    }
+
+    // Update scroll indicator based on page scrollability
+    function updateScrollIndicator() {
+      const indicator = document.getElementById('scrollIndicator');
+      const isScrollable = document.documentElement.scrollHeight > window.innerHeight + 100;
+      indicator.style.display = isScrollable ? 'block' : 'none';
+    }
+
+    // Show transition effect
+    function showTransition(direction) {
+      const overlay = document.getElementById('transitionOverlay');
+      overlay.textContent = direction === 'next' ? '→' : '←';
+      overlay.style.display = 'flex';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 200);
+    }
+
+    // Navigate to next page
+    function nextPage() {
+      if (currentPage < totalPages) {
+        showTransition('next');
+        currentPage++;
+        renderPage(currentPage);
+        console.log(`[Test Page] Navigated to page ${currentPage}`);
+      } else {
+        console.log('[Test Page] Already at last page');
+      }
+    }
+
+    // Navigate to previous page
+    function prevPage() {
+      if (currentPage > 1) {
+        showTransition('prev');
+        currentPage--;
+        renderPage(currentPage);
+        console.log(`[Test Page] Navigated to page ${currentPage}`);
+      } else {
+        console.log('[Test Page] Already at first page');
+      }
+    }
+
+    // Handle keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        nextPage();
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft') {
+        prevPage();
+        e.preventDefault();
+      }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', updateScrollIndicator);
+    window.addEventListener('scroll', () => {
+      const indicator = document.getElementById('scrollIndicator');
+      if (window.scrollY > 100) {
+        indicator.style.opacity = '0.3';
+      } else {
+        indicator.style.opacity = '1';
+      }
+    });
+
+    // Initial render
+    renderPage(currentPage);
+
+    // Log ready message
+    console.log('[Test Page] Book Capture test page loaded');
+    console.log('[Test Page] Use arrow keys to navigate between pages');
+    console.log(`[Test Page] Total pages: ${totalPages}`);
+  </script>
+</body>
+</html>
